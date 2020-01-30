@@ -30,6 +30,19 @@ QAndroidSharing::QAndroidSharing() : m_JavaSharing("com/falsinsoft/qtandroidtool
                                                    QtAndroid::androidActivity().object<jobject>())
 {
     m_pInstance = this;
+
+    if(m_JavaSharing.isValid())
+    {
+        const JNINativeMethod JniMethod[] = {
+            {"sharedDataReceived", "(Landroid/content/Intent;)V", reinterpret_cast<void *>(&QAndroidSharing::SharedDataReceived)}
+        };
+        QAndroidJniEnvironment JniEnv;
+        jclass ObjectClass;
+
+        ObjectClass = JniEnv->GetObjectClass(m_JavaSharing.object<jobject>());
+        JniEnv->RegisterNatives(ObjectClass, JniMethod, sizeof(JniMethod)/sizeof(JNINativeMethod));
+        JniEnv->DeleteLocalRef(ObjectClass);
+    }
 }
 
 QObject* QAndroidSharing::qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine)
@@ -53,5 +66,42 @@ void QAndroidSharing::shareText(const QString &Text)
                                        "(Ljava/lang/String;)V",
                                        QAndroidJniObject::fromString(Text).object<jstring>()
                                        );
+    }
+}
+
+void QAndroidSharing::ProcessDataReceived(const QAndroidJniObject &DataIntent)
+{
+    const char IntentClass[] = "android/content/Intent";
+
+    const QString ActionSendId = QAndroidJniObject::getStaticObjectField<jstring>(IntentClass, "ACTION_SEND").toString();
+    const QString ExtraTextId = QAndroidJniObject::getStaticObjectField<jstring>(IntentClass, "EXTRA_TEXT").toString();
+
+    if(DataIntent.isValid())
+    {
+        const QString Action = DataIntent.callObjectMethod("getAction", "()Ljava/lang/String;").toString();
+        const QString Type = DataIntent.callObjectMethod("getType", "()Ljava/lang/String;").toString();
+
+        if(Action == ActionSendId)
+        {
+            if(Type == "text/plain")
+            {
+                const QString SharedText = DataIntent.callObjectMethod("getStringExtra",
+                                                                       "(Ljava/lang/String;)Ljava/lang/String;",
+                                                                       QAndroidJniObject::fromString(ExtraTextId).object<jstring>()
+                                                                       ).toString();
+                emit sharedTextReceived(SharedText);
+            }
+        }
+    }
+}
+
+void QAndroidSharing::SharedDataReceived(JNIEnv *env, jobject thiz, jobject dataIntent)
+{
+    Q_UNUSED(env)
+    Q_UNUSED(thiz)
+
+    if(m_pInstance != nullptr)
+    {
+        m_pInstance->ProcessDataReceived(QAndroidJniObject(dataIntent));
     }
 }

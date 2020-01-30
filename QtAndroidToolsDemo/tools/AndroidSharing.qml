@@ -1,11 +1,15 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import QtQuick.Dialogs 1.3
 import QtAndroidTools 1.0
 
-ScrollablePage {
+Page {
     id: page
     padding: 20
+
+    Connections {
+        target: QtAndroidSharing
+        onSharedTextReceived: receivedSharedtext.text = text
+    }
 
     Column {
         anchors.fill: parent
@@ -26,6 +30,16 @@ ScrollablePage {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Share"
             onClicked: QtAndroidSharing.shareText(sharedText.text)
+        }
+
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "Received shared text"
+            font.bold: true
+        }
+        Label {
+            id: receivedSharedtext
+            anchors.horizontalCenter: parent.horizontalCenter
         }
     }
 }

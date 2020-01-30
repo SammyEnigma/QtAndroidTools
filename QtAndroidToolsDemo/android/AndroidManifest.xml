@@ -68,6 +68,15 @@
             <!-- extract android style -->
     </activity>
 
+    <activity android:name="com.falsinsoft.qtandroidtools.AndroidSharing$DataReceiverActivity" android:label="-- %%INSERT_APP_NAME%% --">
+        <intent-filter>
+            <action android:name="android.intent.action.SEND"/>
+            <category android:name="android.intent.category.DEFAULT"/>
+            <data android:mimeType="text/plain"/>
+        </intent-filter>
+    <meta-data android:name="android.app.lib_name" android:value="-- %%INSERT_APP_LIB_NAME%% --"/>
+        </activity>
+
     <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
 
     <service android:name="com.google.android.vending.expansion.downloader.impl.DownloaderService" android:enabled="true"/>

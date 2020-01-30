@@ -40,7 +40,14 @@ public:
 
     Q_INVOKABLE void shareText(const QString &Text);
 
+signals:
+    void sharedTextReceived(const QString &text);
+
 private:
     const QAndroidJniObject m_JavaSharing;
     static QAndroidSharing *m_pInstance;
+
+    static void SharedDataReceived(JNIEnv *env, jobject thiz, jobject dataIntent);
+
+    void ProcessDataReceived(const QAndroidJniObject &DataIntent);
 };

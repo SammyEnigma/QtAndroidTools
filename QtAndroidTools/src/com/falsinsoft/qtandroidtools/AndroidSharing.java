@@ -28,6 +28,8 @@ import android.content.Context;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
+import android.os.Bundle;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.content.ComponentName;
@@ -51,4 +53,17 @@ public class AndroidSharing
         Intent ShareIntent = Intent.createChooser(SendIntent, null);
         mActivityInstance.startActivity(ShareIntent);
     }
+
+    public static class DataReceiverActivity extends Activity
+    {
+        @Override
+        public void onCreate(Bundle savedInstanceState)
+        {
+            super.onCreate(savedInstanceState);
+            sharedDataReceived(getIntent());
+            finish();
+        }
+    }
+
+    private static native void sharedDataReceived(Intent DataIntent);
 }
